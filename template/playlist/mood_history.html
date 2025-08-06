@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Mood History | MoodTunes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1DB954;
+            --primary-dark: #14833b;
+            --dark: #191414;
+            --light: #ffffff;
+            --gray: #f8f9fa;
+            --border: #e1e5eb;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--light);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        h1 {
+            color: var(--dark);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-info {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--border);
+        }
+        
+        .history-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .history-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .history-table tr:hover {
+            background-color: var(--gray);
+        }
+        
+        .mood-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .mood-emoji {
+            font-size: 1.2rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-light);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+        
+        .nav-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn i {
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .history-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Your Mood Journey</h1>
+            <div class="user-info">
+                <i class="fas fa-user"></i> {{ request.user.username }}
+            </div>
+        </div>
+
+        {% if entries %}
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Mood</th>
+                    <th>Date & Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in entries %}
+                <tr>
+                    <td>
+                        <div class="mood-cell">
+                            <span class="mood-emoji">
+                                {% if record.mood == "happy" %}😊
+                                {% elif record.mood == "sad" %}😢
+                                {% elif record.mood == "calm" %}😌
+                                {% elif record.mood == "angry" %}😠
+                                {% elif record.mood == "excited" %}🤩
+                                {% elif record.mood == "relaxed" %}🧘
+                                {% elif record.mood == "anxious" %}😰
+                                {% elif record.mood == "motivated" %}💪
+                                {% elif record.mood == "bored" %}😑
+                                {% elif record.mood == "nostalgic" %}🕰️
+                                {% endif %}
+                            </span>
+                            <span>{{ record.mood|title }}</span>
+                        </div>
+                    </td>
+                    <td>{{ record.timestamp|date:"M j, Y · g:i A" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clock"></i>
+            <h3>No Mood History Yet</h3>
+            <p>Your mood tracking journey begins here!</p>
+        </div>
+        {% endif %}
+
+        <a href="{% url 'mood_input' %}" class="nav-btn">
+            <i class="fas fa-arrow-left"></i> Back to Mood Input
+        </a>
+    </div>
+</body>
+</html>
